@@ -11,12 +11,16 @@ This project implements a mental health chatbot using FastAPI for the backend an
 ## Setup and Installation
 
 1. Clone the repository:
+   ```sh
 git clone https://github.com/your-username/Mental-Health-Chatbot.git
+
+2. Navigate to the project directory:
+   ```sh
 cd Mental-Health-Chatbot
-2. Create a virtual environment and activate it:
+4. Create a virtual environment and activate it:
 python -m venv venv
 source venv/bin/activate  # On Windows, use venv\Scripts\activate
-3. Install the required packages:
+5. Install the required packages:
 pip install -r requirements.txt
 
 ## Running the Application
