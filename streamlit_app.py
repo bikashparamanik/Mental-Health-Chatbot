@@ -36,4 +36,13 @@ if st.button("Classify"):
         st.error(f"An error occurred: {e}")
         st.error("Make sure the FastAPI server is running on localhost:8000")
 
+if st.button("Check Model Accuracy"):
+    try:
+        response = requests.get("http://localhost:8000/model_accuracy")
+        response.raise_for_status()
+        accuracy = response.json()['accuracy']
+        st.write(f"Model Accuracy: {accuracy:.2f}")
+    except requests.exceptions.RequestException as e:
+        st.error(f"An error occurred: {e}")
+
 st.info("Note: This is a demonstration and should not be used for actual mental health diagnosis. Always consult with a qualified mental health professional for accurate assessment and support.")

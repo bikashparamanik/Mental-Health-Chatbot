@@ -8,5 +8,5 @@ pandas
 numpy
 streamlit
 requests
-
-
+imblearn
+nltk

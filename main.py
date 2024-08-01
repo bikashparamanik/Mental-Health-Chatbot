@@ -4,6 +4,11 @@ from transformers import pipeline
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
 
 app = FastAPI()
 
@@ -17,6 +22,23 @@ with open('data/sample_articles.txt', 'r') as f:
 
 # Precompute article embeddings
 article_embeddings = sentence_model.encode(articles)
+
+# Load and prepare the mental health dataset
+df = pd.read_csv('mental_health.csv')
+# Remove rows with NaN values
+df = df.dropna(subset=['statement', 'status'])
+X = df['statement']
+y = df['status']
+
+# Split the data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create and train the classification model
+classification_model = Pipeline([
+    ('tfidf', TfidfVectorizer()),
+    ('clf', MultinomialNB()),
+])
+classification_model.fit(X_train, y_train)
 
 class RAGInput(BaseModel):
     prompt: str
@@ -45,18 +67,14 @@ async def rag_endpoint(prompt: str):
 @app.get("/classification")
 @app.post("/classification")
 async def classification_endpoint(text: str):
-    # Simple keyword-based classification (this is a placeholder and not accurate for real use)
-    text = text.lower()
-    if 'anxious' in text or 'worry' in text or 'nervous' in text:
-        category = "Anxiety"
-    elif 'sad' in text or 'hopeless' in text or 'depressed' in text or  'broken' in text or 'hurt' in text:
-        category = "Depression"
-    elif 'die' in text or 'suicide' in text or 'end my life' in text:
-        category = "Suicidal"
-    else:
-        category = "Normal"
-    
+    # Use the trained model to predict the category
+    category = classification_model.predict([text])[0]
     return {"category": category}
+
+@app.get("/model_accuracy")
+async def model_accuracy():
+    accuracy = classification_model.score(X_test, y_test)
+    return {"accuracy": accuracy}
 
 if __name__ == "__main__":
     import uvicorn
